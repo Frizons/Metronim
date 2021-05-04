@@ -360,4 +360,4 @@ function emitEndGame(roomName){
 		.emit('endGame');
 }
 
-io.listen(3742);
+io.listen(process.env.PORT || 3742);

@@ -1,4 +1,4 @@
-const socket = io('http://localhost:3742');
+const socket = io('https://agile-chamber-43949.herokuapp.com/');
 
 //Connecte les evenements envoyer par le serveur au fonction frontend
 
@@ -31,10 +31,6 @@ const gameCodeInput = document.getElementById('gameCodeInput');
 
 const gameCodeDisplay = document.getElementById('gameCodeDisplay');
 const waitGameDisplay = document.getElementById('waitGameToStart');
-
-const gameTimer = document.getElementById('gameTimer');
-
-const boxBox = document.getElementById('boxBox');
 
 const firstChoice = document.getElementById('firstChoice');
 const secondChoice = document.getElementById('secondChoice');
