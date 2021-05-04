@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>Metronim - Play with your friends </title>
+	<link rel="shortcut icon" href = "ressources/favicon.png">
+</head>
+<body onload="get()">
+	<section class="vh-100">
+		<div class="container h-100">
+			<div id="initialScreen" class="h-100">
+				<div class="d-flex flex-column align-items-center justify-content-center h-100">
+					<h1 style="position:relative; bottom:75px; font-size:75px; text-shadow: #000000 0px 0 10px;">METRONIM</h1>
+					<a 
+					class="btn"
+					href='https://www.youtube.com/channel/UCJF69_fAukfhg720XulSgPg'
+					target="_blank"
+					style="position:absolute; top:50px; right:50px;"
+					id="howToPlay"> How to play </a>
+					<div class="sans-ligne pseudo">
+						<input type="text" autocomplete="off" placeholder="Pseudo" id="gameNameInput"/>
+					</div>
+					<button
+						style="top:60px; right:150px;"
+						type="submit"
+						class="btn form-group"
+						id="newGameBtn"
+					>
+					Create Room
+					</button>
+					<div>OR</div>
+					<div class="form-group">
+						<input type="text" autocomplete="off" placeholder="Enter Game Code" id="gameCodeInput" style="text-transform: uppercase; position:relative; bottom:75px; left:150px;"/>
+					</div>
+					<button
+						style="bottom:75px; left:150px;"
+						type="submit"
+						class="btn form-group"
+						id="joinGameBtn"
+					>
+					Join Room
+					</button>
+				</div>
+			</div>
+			
+			<div id="imgLoader" style="display:none">
+				<img src="ressources/train_01.png" id="train_01"/>
+				<img src="ressources/train_02.png" id="train_02"/>
+				<img src="ressources/arrow_ind.png" id="arrow_ind"/>
+				<img src="ressources/tunel_up.png" id="tunel_up"/>
+				<img src="ressources/tunel_up_half.png" id="tunel_up_half"/>
+				<img src="ressources/tunel_down.png" id="tunel_down"/>
+				<img src="ressources/station.png" id="station"/>t
+			</div>
+			
+			<canvas id="canvas">Your browser is probably too old for this incredible game.... but you can share it with your friends like 'ho men check out this game I love the fact that it is multiplayer and.. yeah.. like that sort of games.. you should play it...'</canvas>
+			
+			<div id="lobbyScreen" class="h-100" style="display:none;">
+				<div class="d-flex flex-column align-items-center justify-content-center h-100">
+					<h1 style="margin-top:-25px;">Your game code is: <span id="gameCodeDisplay"></span></h1>
+					
+					<div class="spacer" style="height:700px;"> </div>
+					
+					<button
+						style="display:none;"
+						type="submit"
+						class="btn"
+						id="startBtn"
+					>
+					Start Game
+					</button>
+					<div id="waitGameToStart">
+					Waiting to start the game...
+					</div>
+				</div>
+			</div>
+			
+			<div id="gameScreen" class = "h-100" style="display:none;">
+				
+				<div id ="creditContainer">
+					<div id="creditDisplay">50</div>
+					<img src="ressources/iconargent.png" class="iconArgent" style="width:45px; position:absolute; top:40px"/>
+				</div>
+				
+				<div id="descContainer">
+					<div id="descTitle">Lore ipsum</div>
+					<div id="descContent">le but du jeu est d'amener la bombe au molieur pour casser la proie au sol sans kniker la voize</div>
+				</div>
+				
+				<div id="shop">
+					<button type="submit" class="shopBtn" id="firstChoice">
+						<span class="priceText" id="firstPrice"></span>
+						<img src="ressources/iconargent.png" class="iconArgent"/>
+					</button>
+					<button type="submit" class="shopBtn" id="secondChoice" >
+						<span class="priceText" id="secondPrice"></span>
+						<img src="ressources/iconargent.png" class="iconArgent"/>
+					</button>
+					<button type="submit" class="shopBtn" id="thirdChoice">
+						<span class="priceText" id="thirdPrice"></span>
+						<img src="ressources/iconargent.png" class="iconArgent"/>
+					</button>
+					<button type="submit" class="shopBtn" id="fourthChoice">
+						<span class="priceText" id="fourthPrice"></span>
+						<img src="ressources/iconargent.png" class="iconArgent"/>
+					</button>
+				</div>
+				
+				<div id="preSendGauge">
+					<div id="behindGauge"></div>
+					<div id="frontGauge"></div>
+				</div>
+				
+			</div>
+			
+			<div id="resultScreen" class = "h-100" style="display:none;">
+				<!-- something -->
+			</div>
+			
+		</div>
+	</section>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+	<script src="index.js"></script>
+</body>
+</html>
