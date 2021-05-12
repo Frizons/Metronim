@@ -6,7 +6,7 @@
 	<title>Metronim - Play with your friends </title>
 	<link rel="shortcut icon" href = "ressources/favicon.png">
 </head>
-<body onload="get()">
+<body onload="get()" onbeforeunload="leftGame()">
 	<section class="vh-100">
 		<div class="container h-100">
 			<div id="initialScreen" class="h-100">
@@ -45,13 +45,17 @@
 			</div>
 			
 			<div id="imgLoader" style="display:none">
-				<img src="ressources/train_01.png" id="train_01"/>
-				<img src="ressources/train_02.png" id="train_02"/>
+				<img src="ressources/mine.png" id="mineImg"/>
 				<img src="ressources/arrow_ind.png" id="arrow_ind"/>
 				<img src="ressources/tunel_up.png" id="tunel_up"/>
 				<img src="ressources/tunel_up_half.png" id="tunel_up_half"/>
 				<img src="ressources/tunel_down.png" id="tunel_down"/>
-				<img src="ressources/station.png" id="station"/>t
+				<img src="ressources/station.png" id="station"/>
+				<img src="ressources/iconargent.png" id="iconargent"/>
+				<img src="ressources/burned_LIGHT.png" id="lightBurned"/>
+				<img src="ressources/burned_UTILITY.png" id="utilityBurned"/>
+				<img src="ressources/burned_EXPLOSIVE.png" id="explosiveBurned"/>
+				<img src="ressources/trains/Train Thief.png" id="thiefAnim"/>
 			</div>
 			
 			<canvas id="canvas">Your browser is probably too old for this incredible game.... but you can share it with your friends like 'ho men check out this game I love the fact that it is multiplayer and.. yeah.. like that sort of games.. you should play it...'</canvas>
@@ -77,11 +81,6 @@
 			</div>
 			
 			<div id="gameScreen" class = "h-100" style="display:none;">
-				
-				<div id ="creditContainer">
-					<div id="creditDisplay">50</div>
-					<img src="ressources/iconargent.png" class="iconArgent" style="width:45px; position:absolute; top:40px"/>
-				</div>
 				
 				<div id="descContainer">
 					<div id="descTitle">Lore ipsum</div>
@@ -115,7 +114,22 @@
 			</div>
 			
 			<div id="resultScreen" class = "h-100" style="display:none;">
-				<!-- something -->
+			
+				<div id="winnerTitle">
+					
+				</div>
+				
+				<div id="resultPanel">
+					
+				</div>
+				
+				<button
+					type="submit"
+					class="btn form-group"
+					id="playAgainBtn"
+				>
+				Play Again
+				</button>
 			</div>
 			
 		</div>

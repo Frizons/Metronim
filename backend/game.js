@@ -1,4 +1,4 @@
-const {METRO_SPEED, MAX_HEALTH, TRAIN_TYPE } = require('./constants');
+const { METRO_SPEED, MAX_HEALTH, TRAIN_TYPE } = require('./constants');
 const { randomNum } = require('./utils');
 
 /*
@@ -22,6 +22,7 @@ module.exports = {
 	initGame,
 	addPublicPlayer,
 	addPrivatePlayer,
+	addStatsPlayer,
 	trainIdByName,
 	getAllTrainPos,
 	getTrainPos,
@@ -31,7 +32,7 @@ module.exports = {
 function initGame() {
 	
 	//Cree et retourne les state public et privee par defaut
-	const twoState = [createGameState(), createPrivateState()]
+	const twoState = [createGameState(), createPrivateState(), createStats()]
 	return twoState;
 }
 
@@ -42,6 +43,7 @@ function createGameState() {
 		phase: 0, // 0: Lobby, 1: Game, 2:Result
 		trainOnRail : [],
 		trainSheet : compileSheet(),
+		mineOnRail : [],
 		count : 0,
 	};
 }
@@ -52,6 +54,16 @@ function createPrivateState() {
 		order: [],
 		leftLink : [],
 		rightLink : [],
+	};
+}
+
+//cree le state de depart
+function createStats() {
+	return {
+		winner : -1,
+		trainSpawn : 0,
+		gameDuration : 0,
+		players : [],
 	};
 }
 
@@ -80,22 +92,21 @@ function trainIdByName(name){
 
 function getTrainPos(state, trainCollision, order, leftLink, rightLink){
 	let result = [];
-	const TrainRef = trainCollision;
 	
 	const playerPos = computePlayerPos(state, order);
 	
 	
-	const theWay = TrainRef["way"];
+	const theWay = trainCollision["way"];
 	
-	let sendId = TrainRef["senderUpdate"];
+	let sendId = trainCollision["senderUpdate"];
 	
 	let receiveId = theWay ? leftLink[sendId] : rightLink[sendId];
 	
 	const nodeDiffX = playerPos[receiveId][0] - playerPos[sendId][0];
 	const nodeDiffY = playerPos[receiveId][1] - playerPos[sendId][1];
 	
-	const resultX = playerPos[sendId][0] + nodeDiffX * (TrainRef["progress"] + 0.1);
-	const resultY = playerPos[sendId][1] + nodeDiffY * (TrainRef["progress"] + 0.1);
+	const resultX = playerPos[sendId][0] + nodeDiffX * (trainCollision["progress"] + 0.07);
+	const resultY = playerPos[sendId][1] + nodeDiffY * (trainCollision["progress"] + 0.07);
 	
 	result.push(resultX);
 	result.push(resultY);
@@ -120,8 +131,8 @@ function getAllTrainPos(state, order, leftLink, rightLink){
 		const nodeDiffX = playerPos[receiveId][0] - playerPos[sendId][0];
 		const nodeDiffY = playerPos[receiveId][1] - playerPos[sendId][1];
 		
-		const resultX = playerPos[sendId][0] + nodeDiffX * (allTrainRef[i]["progress"]+0.05);
-		const resultY = playerPos[sendId][1] + nodeDiffY * (allTrainRef[i]["progress"]+0.05);
+		const resultX = playerPos[sendId][0] + nodeDiffX * (allTrainRef[i]["progress"]+0.07);
+		const resultY = playerPos[sendId][1] + nodeDiffY * (allTrainRef[i]["progress"]+0.07);
 		
 		result.push([resultX, resultY]);
 	}
@@ -172,6 +183,7 @@ function addPublicPlayer(state, playerName, skinChosen) {
 			pseudo : playerName, //player's pseudo                            (PUBLIC)
 			health : MAX_HEALTH, //player's health                            (PUBLIC)
 			skin : skinChosen,  //skin chosen by the player                   (PUBLIC)
+			dirtyTrain : 0,     //Dirty Trains remaining                      (PUBLIC)
 		});
 	newState["players"] = playersArray;
 	
@@ -191,6 +203,20 @@ function addPrivatePlayer(privateState, playerNum) {
 	newPrivateState["players"] = secretArray
 	
 	return newPrivateState;
+}
+
+function addStatsPlayer(statistics) {
+	const newStats = statistics;
+	let playersArray = newStats["players"];
+	playersArray.push(
+		{
+			damageDealt : 0,
+			trainCollision : 0,
+			creditsSpend : 0,
+		});
+	newStats["players"] = playersArray;
+	
+	return newStats;
 }
 
 function generateShop(){

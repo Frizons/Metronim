@@ -17,7 +17,11 @@ body{
 .flex-column{flex-direction:column}
 .align-items-center{align-items:center}
 .justify-content-center{justify-content:center}
-.btn{color:#212529;
+.form-group{
+	margin-bottom:1rem;
+}
+.btn{
+	color:#212529;
 	position:relative;
 	text-align:center;
 	vertical-align:middle;
@@ -41,9 +45,6 @@ body{
 	cursor:pointer;
 }
 
-.form-group{
-	margin-bottom:1rem;
-}
 
 #canvas{
 	z-index:-1;
@@ -51,43 +52,19 @@ body{
 	top:0px;
 	left:0px;
 	right:0;
-	margin-left:auto;
-	margin-right:auto;
-}
-
-#creditContainer{
-	position:absolute;
-	background-color:transparent;
-	border-radius:8px;
-	left:0;
-	right:0;
 	margin:auto;
-	bottom:125px;
-	width:120px;
-	height:120px;
-	
-}
-
-#creditDisplay{
-	font-family:"Segoe UI",Roboto;
-	color:#727D89;
-	text-align:right;
-	font-size:35px;
-	font-weight:800;
-	line-height:3.5;
-	text-indent:10px;
-	position:relative;
-	right:65px;
 }
 
 #descContainer{
 	display:none;
 	position:absolute;
-	background-color:#bbbbbb;
-	border:4px solid #dddddd;
+	background-color:#222222;
+	border:4px solid #444444;
 	border-radius:8px;
-	bottom:150px;
-	left:690px;
+	top:30px;
+	left:0;
+	right:0;
+	margin:auto;
 	width:300px;
 	height:120px;
 }
@@ -100,7 +77,7 @@ body{
 	font-weight:600;
 	font-size:20px;
 	line-height:0.0;
-	color:black;
+	color:#aaaaaa;
 }
 #descContent{
 	position:relative;
@@ -112,7 +89,7 @@ body{
 	text-justify: auto;
 	font-size:17px;
 	font-weight:500;
-	color:#222222;
+	color:#aaaaaa;
 }
 
 #shop{
@@ -123,7 +100,7 @@ body{
 	bottom:80px;
 	margin:auto;
 	height:70px;
-	width:345px;
+	width:710px;;
 }
 
 .shopBtn{
@@ -132,21 +109,28 @@ body{
 	text-indent:2px;
 	position:relative;
 	top:5px;
-	left:2px;
-	width:80px;
-	height:80px;
+	left:5px;
+	width:170px;
+	height:90px;
 	font-size:20px;
 	font-weight:800;
-	padding-bottom: 20px;
 	font-family: Montserrat,sans-serif;
 	border:4px solid transparent;
 }
 
-.logoTrain{
-	width:70%;
-}
-
 .shopBtn:not(disabled){cursor:pointer;}
+
+.logoTrain{
+	position:absolute;
+	right:0;
+	left:0;
+	bottom:0;
+	top:0;
+	margin:auto;
+	padding-right:20px;
+	height:100%;
+	transform: rotate(90deg);
+}
 
 #firstChoice{background-color:#A88070;}
 
@@ -163,23 +147,23 @@ body{
 	font-weight:800;
 	line-height:1;
 	position:absolute;
-	bottom:4px;
-	right:53%;
+	bottom:8px;
+	right:52%;
 	
 }
 
 .iconArgent{
 	position:absolute;
-	bottom:3px;
-	left:53%;
+	bottom:6px;
+	left:52%;
 	width:20px;
 	color:#59626B;
 }
 
 #preSendGauge{
 	position:absolute;
-	bottom:30px;
-	width:340px;
+	bottom:20px;
+	width:700px;
 	height:20px;
 	left:0;
 	right:0;
@@ -190,9 +174,9 @@ body{
 	border:2px solid black;
 	position:absolute;
 	width:100%;
-	height:20px;
-	border-radius:8px;
-	background-color:grey;
+	height:10px;
+	border-radius:5px;
+	background-color:#222222;
 }
 
 #frontGauge{
@@ -200,13 +184,90 @@ body{
 	top:2px;
 	left:2px;
 	width:0%;
-	height:20px;
-	border-radius:6px;
+	height:10px;
+	border-radius:5px;
 	background-color:#C42B25; 
 }
 
 #waitGameToStart{
 	display:none;
+}
+
+#resultPanel{
+	position:absolute;
+	left:100px;
+	top:150px;
+	height:500px;
+	width:300px;
+}
+
+#winnerTitle{
+	font-family:"Segoe UI",sans-serif;
+	color:#8D90A8;
+	background-color:#373A56;
+	border-radius:10px;
+	width:450px;
+	height:75px;
+	font-size:40px;
+	font-weight:500;
+	line-height:1.75;
+	position:absolute;
+	right:0;
+	left:0;
+	margin:auto;
+	top:50px;
+	text-align:center;
+}
+
+.globalStats{
+	font-family:"Segoe UI",sans-serif;
+	color:#8D90A8;
+	background-color:#373A5650;
+	border-radius:10px;
+	width:200px;
+	height:50px;
+	font-size:25px;
+	font-weight:500;
+	line-height:2;
+	text-align:center;
+	margin-bottom:20px;
+}
+
+.playerLine{
+	margin-top:10px;
+	font-family:"Segoe UI",sans-serif;
+	color:black;
+	background-color:#A53838;
+	width:200px;
+	height:35px;
+	font-size:20px;
+	font-weight:500;
+	line-height:1.6;
+	text-align:left;
+	text-indent:10px;
+	
+}
+
+.statsLine{
+	font-family:"Segoe UI",sans-serif;
+	color:#bbbbbb;
+	background-color:#A5383850;
+	width:200px;
+	height:35px;
+	font-size:20px;
+	font-weight:500;
+	line-height:1.6;
+	text-align:left;
+	text-indent:10px;
+	
+}
+
+#playAgainBtn{
+	position:absolute;
+	top:800px;
+	left:0;
+	right:0;
+	margin:auto;
 }
 
 .sans-ligne, input{

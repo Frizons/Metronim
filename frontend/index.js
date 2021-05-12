@@ -1,10 +1,14 @@
 const socket = io('https://agile-chamber-43949.herokuapp.com/');
+// const socket = io('localhost:3742');
 
 //Connecte les evenements envoyer par le serveur au fonction frontend
 
 socket.on('init', handleInit);
 socket.on('gameState', handleGameState); // Sert uniquement dans le lobby a update les pseudos / skins des joueurs
 socket.on('updatePoints', handlePoints);
+socket.on('spawnMine', handleMine);
+socket.on('firedTrain', handleFired);
+socket.on('fusionTrain', handleFusion);
 socket.on('explode', handleExplosion);
 socket.on('endGame', handleEndGame);
 socket.on('gameCode', handleGameCode);
@@ -14,7 +18,7 @@ socket.on('gameAlreadyStart', handleGameAlreadyStart);
 socket.on('runGame', initGame);
 
 //Event relative to trains specifications
-
+socket.on('spyed', handleSpyed);
 
 //recupere les references des elements html
 
@@ -37,7 +41,6 @@ const secondChoice = document.getElementById('secondChoice');
 const thirdChoice = document.getElementById('thirdChoice');
 const fourthChoice = document.getElementById('fourthChoice');
 
-const creditDisplay = document.getElementById('creditDisplay');
 const scoreDisplay = document.getElementById('scoreDisplay');
 
 const frontGauge = document.getElementById('frontGauge');
@@ -48,6 +51,9 @@ const launchTrainButton = document.getElementById('launchTrainButton');
 const descContainer = document.getElementById('descContainer');
 const descTitle = document.getElementById('descTitle');
 const descContent = document.getElementById('descContent');
+
+const winnerTitle = document.getElementById('winnerTitle');
+const resultPanel = document.getElementById('resultPanel');
 
 
 let shopPerso = [];
@@ -68,6 +74,7 @@ firstChoice.addEventListener('mousedown', selectTrain.bind(null, 0));
 secondChoice.addEventListener('mousedown', selectTrain.bind(null, 1));
 thirdChoice.addEventListener('mousedown', selectTrain.bind(null, 2));
 fourthChoice.addEventListener('mousedown', selectTrain.bind(null, 3));
+playAgainBtn.addEventListener('click', reset);
 newGameBtn.addEventListener('click', newGame);
 joinGameBtn.addEventListener('click', joinGame);
 startGameBtn.addEventListener('click', () => {
@@ -78,10 +85,16 @@ startGameBtn.addEventListener('click', () => {
 function newGame() {
 	const pseudo = gameNameInput.value;
 	const skin = 0;
+	
 	if (pseudo !== "") {
 		save(pseudo);
 		socket.emit('newGame', pseudo, skin);
 		initLobby();
+		
+		// var w = window;
+		// var html = '<html><head> <script src="index.js"\></script> <title>Metronim - code</title> </head>  <body></body></html>';
+		// w.document.write(html);
+		// document.implementation.createHTMLDocument();  Create a page with the name of the gamecode
 	}
 }
 
@@ -92,10 +105,27 @@ function save(item){
 	localStorage.setItem("storedItem", item);
 }
 
-//Permet de prendre le pseudo dans la mémoire local
+//Permet de prendre le pseudo dans la mémoire local et de charger la room
 function get(){
 	localStorage.getItem("storedItem");
 	gameNameInput.value = storedItem;
+	
+	// const fullURL = window.location.href.split("/");
+	
+	// const code = fullURL[fullURL.length-1];
+	
+	// if (code.length != 4) return;
+	
+	// console.log(code);
+	// joinGame(code)
+	
+}
+
+function leftGame(){
+	if (socket != null && roomCode) {
+		socket.emit('userDisconnect', roomCode);
+		socket.close();
+	}
 }
 
 //si join pressed alors initialise le canvas et envoie le code saisie au backend
@@ -124,8 +154,14 @@ let rightLink = []; // liste du lien de droite
 let trainSelected = -1;  // le train selectionné dans la boutique
 let waySelected = false;  // le chemin selectionné
 let stillPressing = false; // verifie si on appuie toujours sur espace
-let fireProgress = 1.0; // valeur de la gauge d'envoi
+let fireProgress = 0.0; // valeur de la gauge d'envoi
 let exploData = [];
+let dustData = [];
+let addMoneyProg = 0.2;
+let mineTravel = [];
+let firedTrain = [];
+let fusionTrain = [];
+let spyCredits = null;
 
 //Initialise le canvas
 function initLobby() {
@@ -135,6 +171,7 @@ function initLobby() {
 	canvas = document.getElementById('canvas');
 	ctx = canvas.getContext('2d');
 	
+	canvas.style.display = "block";
 	canvas.height = 900;
 	canvas.width = 1900;
 	
@@ -173,7 +210,7 @@ function initiateShop(shop){
 		// a l'avenir remplacer par des img et donc plus de switch
 		const img = document.createElement("img");
 		listChoice[i].appendChild(img);
-		img.src = "ressources/logo_train/" + shop[i]["name"] + ".png";
+		img.src = "ressources/trains/" + shop[i]["name"] + ".png";
 		img.className = "logoTrain";
 		
 	}
@@ -183,8 +220,6 @@ function initiateShop(shop){
 let pushHelp = 0;
 function selectTrain(act){
 	pushHelp += 1;
-	
-	if (shopPerso.length ==0) return;
 	
 	if (pushHelp == 5){
 		showAdvice(act)
@@ -226,9 +261,6 @@ function selectTrain(act){
 			trainSelected = -1;
 			break;
 	}
-	
-	document.getElementById('descTitle').innerHTML = shopPerso[act]["name"];
-	document.getElementById('descContent').innerHTML = shopPerso[act]["desc"];
 }
 
 function showAdvice(act){
@@ -236,7 +268,6 @@ function showAdvice(act){
 	
 	descTitle.innerHTML = shopPerso[act]["name"];
 	descContent.innerHTML = shopPerso[act]["desc"];
-	descContainer.style.left = (690 + act * 75).toString() + "px";
 	descContainer.style.display = "block";
 }
 
@@ -274,15 +305,13 @@ function launchTrain(){
 	var barInterval = setInterval(updateLaunchBar, 30);
 	
 	function updateLaunchBar(){
-		if (stillPressing && fireProgress > 0.0){
-			const reverseProgress = fireProgress * -1 + 1;
-			frontGauge.style.width = (reverseProgress * 100).toString() + "%";
-			fireProgress -= 0.03;
+		if (stillPressing && fireProgress < 1.0){
+			frontGauge.style.width = (fireProgress * 100).toString() + "%";
+			fireProgress += 0.03;
 		}else{
 			socket.emit('spawnTrain', roomCode, waySelected, shopPerso[trainSelected]["name"], playerNumber, fireProgress);
-			fireProgress = 1.0;
-			const reverseProgress = fireProgress * -1 + 1;
-			frontGauge.style.width = (reverseProgress * 100).toString() + "%";
+			fireProgress = 0.0;
+			frontGauge.style.width = (fireProgress * 100).toString() + "%";
 			clearInterval(barInterval);
 			selectTrain(4);
 		}
@@ -290,12 +319,40 @@ function launchTrain(){
 }
 
 function handlePoints(newPoints){
+	addMoneyProg = -0.2;
 	credits = newPoints;
-	creditDisplay.innerHTML = newPoints;
 }
 
-function handleExplosion(dmg, posX, posY){
+function handleExplosion(dmg, posX, posY, extraEvent){
+	if (extraEvent == "Dusty"){
+		const dustPart = [];
+		
+		for (d = 0; d < 50; d++){
+			const newX = Math.random() * 84 - 42;
+			const newY = Math.random() * 84 - 42;
+			dustPart.push([newX, newY]);
+		}
+		
+		dustData.push([posX, posY, 0.0, dustPart]);
+		return;
+	}
 	exploData.push([dmg*5, posX, posY, 0.0]);
+}
+
+function handleMine(posX, posY){
+	mineTravel.push([posX, posY, 0.0]);
+}
+
+function handleFired(type, posX, posY, wayUsed, sens){
+	firedTrain.push([type, posX, posY, 0.0, wayUsed, sens, 0]);
+}
+
+function handleFusion(bposX, bposY, nposX, nposY, wayUsed, sens){
+	fusionTrain.push([bposX, bposY, nposX, nposY, wayUsed, sens, 0.0]);
+}
+
+function handleSpyed(isCredits, who){
+	spyCredits = [isCredits, who, 0.0]
 }
 
 //Met a jour le canvas, et le html selon le gamestate
@@ -303,14 +360,7 @@ function paintGame(state){
 	
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
-	switch (state["phase"]) {
-		default: //LOBBY, GAME
-			drawGame(state);
-			break;
-		case 2: //RESULT
-			// Do Something
-			break;
-	}
+	drawGame(state);
 }
 
 let playerPos = [];
@@ -371,7 +421,7 @@ function drawGame(state){
 			
 			let receiveId = leftLink.length > 0 ? waySelected ? leftLink[i] : rightLink[i] : i+1 == playerMany ? 0 : i+1;
 			
-			const nodeDiffX = playerPos[receiveId][0] - playerPos[i][0]; // Uncaught TypeError: Cannot read property '0' of undefined
+			const nodeDiffX = playerPos[receiveId][0] - playerPos[i][0];
 			const nodeDiffY = playerPos[receiveId][1] - playerPos[i][1];
 			
 			const posX = playerPos[i][0] + nodeDiffX * 0.3;
@@ -380,7 +430,7 @@ function drawGame(state){
 			ctx.save();
 			
 			const img = document.getElementById("arrow_ind");
-			const imgSize = [25, 30] // ratio 1.2
+			const imgSize = [25, 30];
 			
 			ctx.translate(posX, posY);
 			
@@ -401,11 +451,51 @@ function drawGame(state){
 		drawHealthBar(playerPos[i][0], playerPos[i][1], state["players"][i]["health"]);
 	}
 	
+	//Draw each mines
+	for (m = 0; m < state["mineOnRail"].length; m++){
+		drawMines(state["mineOnRail"], m, 20);
+	}
+	
 	//Draw each explosions
 	for (e = 0; e < exploData.length; e++) {
 		drawExplosion(exploData[e][0], exploData[e][1], exploData[e][2], e);
 	}
 	
+	//Draw each dust explosions
+	for (d = 0; d < dustData.length; d++) {
+		drawDust(dustData[d][0], dustData[d][1], 3, dustData[d][3], d);
+	}
+	
+	//Draw Money
+	if (state["phase"] == 1){
+		drawMoney(credits);
+	}
+	
+	//Draw each train Fired by roadhog
+	for (f = 0; f < firedTrain.length; f++) {
+		drawFiredTrain(state, firedTrain[f][0], firedTrain[f][1], firedTrain[f][2], f, firedTrain[f][4], firedTrain[f][5]);
+	}
+	
+	//Draw each train Fired by roadhog
+	for (fu = 0; fu < fusionTrain.length; fu++) {
+		drawFusionTrain(state, fusionTrain[fu][0], fusionTrain[fu][1], fusionTrain[fu][2], fusionTrain[fu][3], fusionTrain[fu][4], fusionTrain[fu][5], fu);
+	}
+	if (spyCredits){
+		drawSpyCredits(spyCredits[0], playerPos[spyCredits[1]][0], playerPos[spyCredits[1]][1]);
+	}
+}
+
+function drawMines(mines, m, m_size){
+	const mineImg = document.getElementById("mineImg");
+	
+	if (mineTravel[m][2] < 1.0){
+		mineTravel[m][2] += 0.2;
+	}
+	
+	const posX = mineTravel[m][0] + ((mines[m][0] - mineTravel[m][0]) * mineTravel[m][2]);
+	const posY = mineTravel[m][1] + ((mines[m][1] - mineTravel[m][1]) * mineTravel[m][2]);
+	
+	ctx.drawImage(mineImg, posX - m_size/2, posY - m_size/2, m_size, m_size);
 }
 
 function drawDownLink(state, playerMany, i){
@@ -437,7 +527,10 @@ function drawDownLink(state, playerMany, i){
 }
 
 function drawTrain(state, playerPos, i){
+	
 	const theWay = state["trainOnRail"][i]["way"]; // Telle est la voie
+	
+	const trainName = state["trainOnRail"][i]["name"];
 	
 	let sendId = state["trainOnRail"][i]["senderUpdate"];
 	
@@ -450,20 +543,28 @@ function drawTrain(state, playerPos, i){
 	const nodeDiffX = playerPos[receiveId][0] - playerPos[sendId][0];
 	const nodeDiffY = playerPos[receiveId][1] - playerPos[sendId][1];
 	
-	const trainForDraw = document.getElementById("train_01");
+	const loadImage = document.createElement("img");
+	loadImage.src = "ressources/trains/" + trainName + ".png";
+	document.getElementById("imgLoader").appendChild(loadImage);
+	
+	const trainForDraw = loadImage;
 	ctx.save();
 	
-	ctx.translate(playerPos[sendId][0] + nodeDiffX * trainProgress, playerPos[sendId][1] + nodeDiffY * trainProgress);
+	const posX = playerPos[sendId][0] + nodeDiffX * trainProgress;
+	const posY = playerPos[sendId][1] + nodeDiffY * trainProgress
+	
+	ctx.translate(posX, posY);
 	
 	const baseRot = getRotationByWay(state, state["trainOnRail"][i]["finalWay"], state["trainOnRail"][i]["way"])+90;
 	
 	ctx.rotate(baseRot*(Math.PI/180));
 	
-	const trainSize = [18, 60]; // ratio 0.3
+	const trainSize = [trainForDraw.width/5, trainForDraw.height/5]; // ratio 0.3
 	
 	ctx.drawImage(trainForDraw, -trainSize[0]/2, -trainSize[1]/2, trainSize[0], trainSize[1]); 
 	
 	ctx.restore();
+	
 }
 
 function drawUpLink(state, playerMany, i){
@@ -519,11 +620,12 @@ function drawExplosion(auraSize, posX, posY, e){
 	}
 	
 	exploData[e][3] += auraSize*0.04;
+
+	ctx.fillStyle = '#D8491190';
 	
 	//Creating the first Aura
 	ctx.beginPath();
 	ctx.arc(posX, posY, auraSize, 0, 2 * Math.PI, false);
-	ctx.fillStyle = '#D8491190';
 	ctx.fill();
 	ctx.closePath();
 	
@@ -549,6 +651,113 @@ function drawExplosion(auraSize, posX, posY, e){
 	}
 }
 
+function drawFiredTrain(state, trainType, posX, posY, f, wayUsed, sens){
+	
+	if (firedTrain[f][3] >= 1.0){
+		firedTrain.splice(f, 1);
+		return;
+	}
+	
+	firedTrain[f][3] += 0.1;
+	
+	let imgType;
+	let imgSize;
+	const multi = 5;
+	
+	switch(trainType){
+		case 0:
+			imgType = document.getElementById("lightBurned");
+			imgSize = [82/multi, 270/multi];
+			break;
+		case 1:
+			imgType = document.getElementById("utilityBurned");
+			imgSize = [86/multi, 271/multi];
+			break;
+		case 2:
+			imgType = document.getElementById("explosiveBurned");
+			imgSize = [115/multi, 275/multi];
+			break;
+	}
+	
+	ctx.save();
+	
+	ctx.translate(posX + (firedTrain[f][3] * 20), posY + (firedTrain[f][3] * -40));
+	
+	const baseRot = getRotationByWay(state, wayUsed, sens)+90 + firedTrain[f][5];
+	
+	firedTrain[f][5] += 5;
+	
+	ctx.rotate(baseRot*(Math.PI/180));
+	
+	ctx.globalAlpha = (firedTrain[f][3] - 1.1) * -1;
+	
+	ctx.drawImage(imgType, -imgSize[0]/2, -imgSize[1]/2, imgSize[0], imgSize[1]);
+	
+	ctx.restore();
+}
+
+function drawFusionTrain(state, bposX, bposY, nposX, nposY, wayUsed, sens, f){
+	
+	if (fusionTrain[f][6] >= 1.0){
+		fusionTrain.splice(f, 1);
+		return;
+	}
+	
+	fusionTrain[f][6] += 0.05;
+	
+	const imgType = document.getElementById("thiefAnim");
+	const multi = 5;
+	const imgSize = [93/multi, 271/multi];
+	
+	const trainDiffX = nposX - bposX;
+	const trainDiffY = nposY - bposY;
+	
+	ctx.save();
+	
+	ctx.translate(bposX + (fusionTrain[f][6] * trainDiffX), bposY + (fusionTrain[f][6] * trainDiffY));
+	
+	const baseRot = getRotationByWay(state, wayUsed, sens)+90;
+	
+	ctx.rotate(baseRot*(Math.PI/180));
+	
+	ctx.globalAlpha = (fusionTrain[f][6] - 1.1) * -1;
+	
+	ctx.drawImage(imgType, -imgSize[0]/2, -imgSize[1]/2, imgSize[0], imgSize[1]);
+	
+	ctx.restore();
+}
+
+function drawSpyCredits(cred, posX, posY){
+	
+	if (spyCredits[2] >= 1.0){
+		spyCredits = null;
+		return;
+	}
+	
+	spyCredits[2] += 0.02;
+	
+	const lineProgress = spyCredits[2] >= 0.1 ? 0.85 : spyCredits[2]*3.5 + 0.5;
+	
+	const linkDiffX = 950 - posX;
+	const linkDiffY = 430 - posY;
+	
+	ctx.lineWidth = 1;
+	ctx.strokeStyle = '#ffffff';
+	
+	ctx.beginPath();
+	ctx.moveTo(posX + (linkDiffX * 0.5), posY + (linkDiffY * 0.5));
+	ctx.lineTo(posX + (linkDiffX * lineProgress), posY + (linkDiffY * lineProgress));
+	ctx.stroke();
+	ctx.closePath();
+	
+	ctx.font = "20pt Montserrat,Geneva,Arial";
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = "center";
+	
+	if (spyCredits[2] >= 0.1) ctx.fillText(cred, 950, 435);
+	
+}
+
 function drawStation(state, indx, indy, s_cpu, ind){
 	
 	const stationDraw = document.getElementById("station");
@@ -560,6 +769,43 @@ function drawStation(state, indx, indy, s_cpu, ind){
 	
 	ctx.font = "8pt Montserrat,Geneva,Arial";
 	ctx.fillText(state["players"][ind]["pseudo"], indx, indy-15-65);
+}
+
+function drawDust(posX, posY, partSize, dustPart, d){
+	
+	if (dustData[d][2] > 1.0){
+		dustData.splice(d, 1);
+		return;
+	}
+	
+	dustData[d][2] += 0.04;
+	
+	for (dust = 0; dust < dustPart.length; dust++){
+		ctx.fillStyle = '#726453';
+		ctx.fillRect(posX + (dustPart[dust][0]*dustData[d][2]) - partSize/2, posY + (dustPart[dust][1]*dustData[d][2])-partSize/2, partSize, partSize);
+	}
+	
+}
+
+function drawMoney(val){
+	
+	ctx.font = "25pt Montserrat,Geneva,Arial";
+	ctx.fillStyle = '#aaaaaa';
+	ctx.textAlign = "right";
+	
+	ctx.fillText(val, 945, 765);
+	
+	let iconSize = [42, 44];
+	
+	if (addMoneyProg < 0.2){
+		addMoneyProg += 0.1;
+		iconSize[0] = (Math.abs(addMoneyProg) + 0.8) * 42;
+		iconSize[1] = (Math.abs(addMoneyProg) + 0.8) * 44;
+	}
+	
+	const iconImg = document.getElementById("iconargent");
+	
+	ctx.drawImage(iconImg, 975 - iconSize[0]/2, 752 - iconSize[1]/2, iconSize[0], iconSize[1]);
 }
 
 function getRotationByWay(state, way, sens){
@@ -594,9 +840,48 @@ function handleInit(numberP, state) {
 }
 
 //Avertis quand le timer s'arrete
-function handleEndGame() {
+function handleEndGame(stats, state) {
 	gameScreen.style.display = 'none';
 	resultScreen.style.display = 'block';
+	
+	if (stats["winner"] == -1){
+		winnerTitle.innerHTML = "Draw !";
+	}
+	winnerTitle.innerHTML = state["players"][stats["winner"]]["pseudo"] + " won the game !";
+	
+	const gameDuration = document.createElement('div');
+	resultPanel.appendChild(gameDuration);
+	gameDuration.innerHTML = "Game time : " + stats["gameDuration"] + "s";
+	gameDuration.className = "globalStats";
+	
+	const trainSpawn = document.createElement('div');
+	resultPanel.appendChild(trainSpawn);
+	trainSpawn.innerHTML = "Train Used : " + stats["trainSpawn"];
+	trainSpawn.className = "globalStats";
+	
+	for (i = 0; i < state["players"].length; i++){
+		
+		const playerStat = document.createElement('div');
+		resultPanel.appendChild(playerStat);
+		playerStat.innerHTML = state["players"][i]["pseudo"] + " : ";
+		playerStat.className = "playerLine";
+		
+		const damageStat = document.createElement('div');
+		resultPanel.appendChild(damageStat);
+		damageStat.innerHTML = "Damage dealt : " + stats["players"][i]["damageDealt"];
+		damageStat.className = "statsLine";
+		
+		const trainColStat = document.createElement('div');
+		resultPanel.appendChild(trainColStat);
+		trainColStat.innerHTML = "Train collision : " + stats["players"][i]["trainCollision"];
+		trainColStat.className = "statsLine";
+		
+		const creditsStat = document.createElement('div');
+		resultPanel.appendChild(creditsStat);
+		creditsStat.innerHTML = "Credits spent : " + stats["players"][i]["creditsSpend"];
+		creditsStat.className = "statsLine";
+	}
+	
 }
 
 //Recupere le gamestate du serveur et demande un rafraichissement du canvas
@@ -635,5 +920,21 @@ function reset() {
 	gameCodeDisplay.innerText = "";
 	initialScreen.style.display = "block";
 	lobbyScreen.style.display = "none";
+	resultScreen.style.display = "none";
 	gameScreen.style.display = "none";
+	canvas.style.display = "none";
+	shopPerso = [];
+	canvas = null;
+	ctx = null;
+	playerNumber = null;
+	roomCode = null;
+	baseOrder = [];
+	credits = 50;
+	leftLink = []; 
+	rightLink = [];
+	trainSelected = -1;
+	waySelected = false;
+	stillPressing = false;
+	fireProgress = 1.0;
+	exploData = [];
 }
