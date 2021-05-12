@@ -6,9 +6,6 @@ const socket = io('https://agile-chamber-43949.herokuapp.com/');
 socket.on('init', handleInit);
 socket.on('gameState', handleGameState); // Sert uniquement dans le lobby a update les pseudos / skins des joueurs
 socket.on('updatePoints', handlePoints);
-socket.on('spawnMine', handleMine);
-socket.on('firedTrain', handleFired);
-socket.on('fusionTrain', handleFusion);
 socket.on('explode', handleExplosion);
 socket.on('endGame', handleEndGame);
 socket.on('gameCode', handleGameCode);
@@ -19,6 +16,9 @@ socket.on('runGame', initGame);
 
 //Event relative to trains specifications
 socket.on('spyed', handleSpyed);
+socket.on('spawnMine', handleMine);
+socket.on('firedTrain', handleFired);
+socket.on('fusionTrain', handleFusion);
 
 //recupere les references des elements html
 
@@ -147,7 +147,7 @@ let playerNumber; // id personnel (dans l'ordre des venue)
 let roomCode; // code de la room rejoins
 
 let baseOrder = []; // ordre des joueurs apres le debut de la partie
-let credits = 50; // credits personnels
+let credits = 0; // credits personnels
 let leftLink = []; // liste du lien de gauche
 let rightLink = []; // liste du lien de droite
 
@@ -196,6 +196,11 @@ function initGame(newOrder, listLeftLink, listRightLink, shop) {
 	shopPerso = shop;
 	
 	initiateShop(shop);
+}
+
+function play(sound) {
+  var audio = new Audio('ressources/sounds/' + sound + '.wav');
+  audio.play();
 }
 
 function initiateShop(shop){
@@ -311,6 +316,7 @@ function launchTrain(){
 		}else{
 			socket.emit('spawnTrain', roomCode, waySelected, shopPerso[trainSelected]["name"], playerNumber, fireProgress);
 			fireProgress = 0.0;
+			play("launch_train");
 			frontGauge.style.width = (fireProgress * 100).toString() + "%";
 			clearInterval(barInterval);
 			selectTrain(4);

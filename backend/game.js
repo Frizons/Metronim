@@ -197,7 +197,7 @@ function addPrivatePlayer(privateState, playerNum) {
 	secretArray.push(
 	{
 		shop : generateShop(),
-		credits : 50, //remaining credits                    	   	         (PRIVATE)
+		credits : 0, //remaining credits                    	   	         (PRIVATE)
 	});
 	
 	newPrivateState["players"] = secretArray
