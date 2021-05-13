@@ -7,6 +7,7 @@ socket.on('init', handleInit);
 socket.on('gameState', handleGameState); // Sert uniquement dans le lobby a update les pseudos / skins des joueurs
 socket.on('updatePoints', handlePoints);
 socket.on('explode', handleExplosion);
+socket.on('newPlayer', handleNewPlayer);
 socket.on('endGame', handleEndGame);
 socket.on('gameCode', handleGameCode);
 socket.on('unknownGame', handleUnknownGame);
@@ -78,7 +79,7 @@ playAgainBtn.addEventListener('click', reset);
 newGameBtn.addEventListener('click', newGame);
 joinGameBtn.addEventListener('click', joinGame);
 startGameBtn.addEventListener('click', () => {
-	socket.emit('startGame', roomCode);
+	if (playerInRoom >= 3) socket.emit('startGame', roomCode);
 });
 
 //si create pressed alors initialise le canvas et envoie le message au backend
@@ -143,6 +144,7 @@ function joinGame() {
 let canvas, ctx; // ref du canvas et du contexte
 
 let playerNumber; // id personnel (dans l'ordre des venue)
+let playerInRoom = 1;
 
 let roomCode; // code de la room rejoins
 
@@ -196,6 +198,14 @@ function initGame(newOrder, listLeftLink, listRightLink, shop) {
 	shopPerso = shop;
 	
 	initiateShop(shop);
+}
+
+function handleNewPlayer(newCount){
+	playerInRoom = newCount+1;
+	if (playerInRoom >= 3){
+		startBtn.classList.remove('btnNotReady');
+		startBtn.classList.add('btn');
+	}
 }
 
 function play(sound) {

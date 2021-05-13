@@ -7,9 +7,11 @@
 	<link rel="shortcut icon" href = "ressources/favicon.png">
 </head>
 <body onload="get()" onbeforeunload="leftGame()">
+
 	<section class="vh-100">
 		<div class="container h-100">
 			<div id="initialScreen" class="h-100">
+			
 				<div class="d-flex flex-column align-items-center justify-content-center h-100">
 					<h1 style="position:relative; bottom:75px; font-size:75px; text-shadow: #000000 0px 0 10px;">METRONIM</h1>
 					<a 
@@ -42,6 +44,19 @@
 					Join Room
 					</button>
 				</div>
+				
+				<a href="https://www.youtube.com/channel/UCJF69_fAukfhg720XulSgPg">
+				<img src="ressources/irilios_logo.png" style="position:absolute; bottom : 20px; width: 60px; right:20px;"/>
+				</a>
+				
+				<div id="donateButt">
+					<form action="https://www.paypal.com/donate" method="post" target="_top">
+						<input type="hidden" name="hosted_button_id" value="GJ92H32ZD2PHW" />
+						<input type="image" src="https://zupimages.net/up/21/19/tgbm.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+						<img alt="" border="0" src="https://www.paypal.com/en_FR/i/scr/pixel.gif" width="1" height="1" />
+					</form>
+				</div>
+				
 			</div>
 			
 			<div id="imgLoader" style="display:none">
@@ -69,7 +84,7 @@
 					<button
 						style="display:none;"
 						type="submit"
-						class="btn"
+						class="btnNotReady"
 						id="startBtn"
 					>
 					Start Game
@@ -137,5 +152,6 @@
 	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
 	<script src="index.js"></script>
+	
 </body>
 </html>

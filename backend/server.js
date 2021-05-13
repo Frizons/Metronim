@@ -82,6 +82,9 @@ io.on('connection', client => {
 		//envoi un message de confirmation au clients
 		client.emit('init', numClients, state[roomName]);
 		
+		//envoi la confirmation d'un nouveau joueur
+		io.in(roomName).emit('newPlayer', numClients);
+		
 		//Envoi la mise a jour du state au clients
 		emitGameState(roomName, state[roomName]);
 		
