@@ -79,7 +79,7 @@ playAgainBtn.addEventListener('click', reset);
 newGameBtn.addEventListener('click', newGame);
 joinGameBtn.addEventListener('click', joinGame);
 startGameBtn.addEventListener('click', () => {
-	if (playerInRoom >= 2) socket.emit('startGame', roomCode);
+	if (playerInRoom >= 3) socket.emit('startGame', roomCode);
 });
 
 //si create pressed alors initialise le canvas et envoie le message au backend
@@ -202,7 +202,7 @@ function initGame(newOrder, listLeftLink, listRightLink, shop) {
 
 function handleNewPlayer(newCount){
 	playerInRoom = newCount+1;
-	if (playerInRoom >= 2){
+	if (playerInRoom >= 3){
 		startBtn.classList.remove('btnNotReady');
 		startBtn.classList.add('btn');
 	}
@@ -326,7 +326,7 @@ function launchTrain(){
 		}else{
 			socket.emit('spawnTrain', roomCode, waySelected, shopPerso[trainSelected]["name"], playerNumber, fireProgress);
 			fireProgress = 0.0;
-			play("launch_train");
+			// play("launch_train");
 			frontGauge.style.width = (fireProgress * 100).toString() + "%";
 			clearInterval(barInterval);
 			selectTrain(4);

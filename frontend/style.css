@@ -78,10 +78,6 @@ height:100%;
 	border-color:#bbbbbb;
 }
 
-.btnNotReady:not(disabled){
-	cursor:pointer;
-}
-
 #canvas{
 	z-index:-1;
 	position:absolute;
