@@ -14,12 +14,12 @@
 			
 				<div class="d-flex flex-column align-items-center justify-content-center h-100">
 					<h1 style="position:relative; bottom:75px; font-size:75px; text-shadow: #000000 0px 0 10px;">METRONIM</h1>
-					<a 
-					class="btn"
-					href='https://www.youtube.com/channel/UCJF69_fAukfhg720XulSgPg'
-					target="_blank"
-					style="position:absolute; top:50px; right:50px;"
-					id="howToPlay"> How to play </a>
+					<!-- <a  -->
+					<!-- class="btn" -->
+					<!-- href='https://www.youtube.com/channel/UCJF69_fAukfhg720XulSgPg' -->
+					<!-- target="_blank" -->
+					<!-- style="position:absolute; top:50px; right:50px;" -->
+					<!-- id="howToPlay"> How to play </a> -->
 					<div class="sans-ligne pseudo">
 						<input type="text" autocomplete="off" placeholder="Pseudo" id="gameNameInput"/>
 					</div>
@@ -75,6 +75,10 @@
 			
 			<canvas id="canvas">Your browser is probably too old for this incredible game.... but you can share it with your friends like 'ho men check out this game I love the fact that it is multiplayer and.. yeah.. like that sort of games.. you should play it...'</canvas>
 			
+			<div id="justPlayScreen">
+				<!-- do something -->
+			</div>
+			
 			<div id="lobbyScreen" class="h-100" style="display:none;">
 				<div class="d-flex flex-column align-items-center justify-content-center h-100">
 					<h1 style="margin-top:-25px;">Your game code is: <span id="gameCodeDisplay"></span></h1>
@@ -106,24 +110,29 @@
 					<button type="submit" class="shopBtn" id="firstChoice">
 						<span class="priceText" id="firstPrice"></span>
 						<img src="ressources/iconargent.png" class="iconArgent"/>
+						<span class="inputAdvice">Q</span>
 					</button>
 					<button type="submit" class="shopBtn" id="secondChoice" >
 						<span class="priceText" id="secondPrice"></span>
 						<img src="ressources/iconargent.png" class="iconArgent"/>
+						<span class="inputAdvice">W</span>
 					</button>
 					<button type="submit" class="shopBtn" id="thirdChoice">
 						<span class="priceText" id="thirdPrice"></span>
 						<img src="ressources/iconargent.png" class="iconArgent"/>
+						<span class="inputAdvice">E</span>
 					</button>
 					<button type="submit" class="shopBtn" id="fourthChoice">
 						<span class="priceText" id="fourthPrice"></span>
 						<img src="ressources/iconargent.png" class="iconArgent"/>
+						<span class="inputAdvice">R</span>
 					</button>
 				</div>
 				
 				<div id="preSendGauge">
 					<div id="behindGauge"></div>
 					<div id="frontGauge"></div>
+					<span id="gaugeText">press Space to launch</span>
 				</div>
 				
 			</div>

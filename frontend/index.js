@@ -1,5 +1,5 @@
-const socket = io('https://agile-chamber-43949.herokuapp.com/');
-// const socket = io('localhost:3742');
+// const socket = io('https://agile-chamber-43949.herokuapp.com/');
+const socket = io('localhost:3742');
 
 //Connecte les evenements envoyer par le serveur au fonction frontend
 
@@ -91,11 +91,6 @@ function newGame() {
 		save(pseudo);
 		socket.emit('newGame', pseudo, skin);
 		initLobby();
-		
-		// var w = window;
-		// var html = '<html><head> <script src="index.js"\></script> <title>Metronim - code</title> </head>  <body></body></html>';
-		// w.document.write(html);
-		// document.implementation.createHTMLDocument();  Create a page with the name of the gamecode
 	}
 }
 
@@ -111,14 +106,13 @@ function get(){
 	localStorage.getItem("storedItem");
 	gameNameInput.value = storedItem;
 	
-	// const fullURL = window.location.href.split("/");
+	const fullURL = window.location.href.split("/");
 	
-	// const code = fullURL[fullURL.length-1];
+	const code = fullURL[fullURL.length-1];
 	
-	// if (code.length != 4) return;
+	if (code.length != 4) return;
 	
-	// console.log(code);
-	// joinGame(code)
+	joinGame(code)
 	
 }
 
@@ -809,7 +803,7 @@ function drawMoney(val){
 	ctx.fillStyle = '#aaaaaa';
 	ctx.textAlign = "right";
 	
-	ctx.fillText(val, 945, 765);
+	ctx.fillText(val, 945, 755);
 	
 	let iconSize = [42, 44];
 	
@@ -821,7 +815,7 @@ function drawMoney(val){
 	
 	const iconImg = document.getElementById("iconargent");
 	
-	ctx.drawImage(iconImg, 975 - iconSize[0]/2, 752 - iconSize[1]/2, iconSize[0], iconSize[1]);
+	ctx.drawImage(iconImg, 975 - iconSize[0]/2, 742 - iconSize[1]/2, iconSize[0], iconSize[1]);
 }
 
 function getRotationByWay(state, way, sens){
@@ -911,6 +905,8 @@ function handleGameState(gameState) {
 function handleGameCode(gameCode) {
 	roomCode = gameCode;
 	gameCodeDisplay.innerText = gameCode;
+	
+	// location.href = '/' + gameCode;
 }
 
 //Check les erreurs
