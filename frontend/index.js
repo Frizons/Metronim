@@ -1,5 +1,5 @@
-// const socket = io('https://agile-chamber-43949.herokuapp.com/');
-const socket = io('localhost:3742');
+const socket = io('https://agile-chamber-43949.herokuapp.com/');
+// const socket = io('localhost:3742');
 
 //Connecte les evenements envoyer par le serveur au fonction frontend
 
